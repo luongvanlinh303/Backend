@@ -1,6 +1,8 @@
 // controllers/authController.js
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const secretKey = crypto.randomBytes(64).toString('hex');
 const jwt = require('jsonwebtoken');
 module.exports = {
   signup: async (req, res) => {
@@ -23,9 +25,9 @@ module.exports = {
         return res.status(401).json({ message: 'Invalid username or password' });
       }
   
-      const token = jwt.sign({ userId: user.id }, 'secretKey');
+      const token = jwt.sign({ userId: user.id }, '130599');
   
-      return res.status(200).json({ token });
+      return res.status(200).json({ role: user.role, token });
     } catch (err) {
       console.error('Error:', err);
       return res.status(500).json({ message: 'An error occurred' });
