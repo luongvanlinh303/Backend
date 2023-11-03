@@ -3,8 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const customerRoutes = require('./routes/customerRoutes');
-const guardRoutes = require('./routes/guardRoutes')
+const guardRoutes = require('./routes/guardRoutes');
+const cors = require('cors');
+
 const app = express();
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
