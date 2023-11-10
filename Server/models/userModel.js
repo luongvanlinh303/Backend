@@ -4,23 +4,23 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  createUser: async (username, passwd, confirmpasswd, role, firstname, lastname, phone) => {
+  createUser: async (email, passwd, confirmpasswd, role, firstname, lastname, phone, salary, gender, dob,address) => {
     const hashedPassword = await bcrypt.hash(passwd, 10);
     const usernameQuery = {
-      text: 'SELECT * FROM users WHERE username = $1',
-      values: [username],
+      text: 'SELECT * FROM users WHERE email = $1',
+      values: [email],
     };
     const existingUser = await pool.query(usernameQuery);
   
     if (existingUser.rows.length > 0) {
-      throw new Error('Username already exists');
+      throw new Error('Email already exists');
     }
     if (passwd !== confirmpasswd) {
       throw new Error('Passwords do not match');
     }
     const query = {
-      text: 'INSERT INTO users (username, passwd, role) VALUES ($1, $2, $3) RETURNING users_id',
-      values: [username, hashedPassword, role],
+      text: 'INSERT INTO users (email, passwd, role) VALUES ($1, $2, $3) RETURNING users_id',
+      values: [email, hashedPassword, role],
     };
   
     try {
@@ -28,16 +28,16 @@ module.exports = {
       const userId = result.rows[0].users_id;
       if (role == 2) {
         const customerQuery = {
-          text: `INSERT INTO customer (users_id, firstname, lastname, phone) VALUES ($1, $2, $3, $4)`,
-          values: [userId, firstname, lastname, phone],
+          text: `INSERT INTO customer (users_id, firstname, lastname, phone, gender, dob,address) VALUES ($1, $2, $3, $4, $5, $6,$7)`,
+          values: [userId, firstname, lastname, phone, gender, dob,address],
         };
         await pool.query(customerQuery);
         
       }
       if (role == 3) {
         const customerQuery = {
-          text: `INSERT INTO guard (users_id, firstname, lastname, phone) VALUES ($1, $2, $3, $4)`,
-          values: [userId, firstname, lastname, phone],
+          text: `INSERT INTO guard (users_id, firstname, lastname, phone,salary, gender, dob,address) VALUES ($1, $2, $3, $4, $5, $6, $7,$8)`,
+          values: [userId, firstname, lastname, phone, salary, gender, dob,address],
         };
         await pool.query(customerQuery);
         
@@ -48,11 +48,11 @@ module.exports = {
     }
   },
   //
-  loginUser: async (username, passwd) => {
+  loginUser: async (email, passwd) => {
     try {
     const userQuery = {
-      text: 'SELECT * FROM users WHERE username = $1',
-      values: [username],
+      text: 'SELECT * FROM users WHERE email = $1',
+      values: [email],
     };
     const result = await pool.query(userQuery);
     const user = result.rows[0];

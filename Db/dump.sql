@@ -2,7 +2,7 @@
 CREATE TABLE users (
     users_id SERIAL PRIMARY KEY,
     role INT NOT NULL,
-    username VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL,
     passwd VARCHAR(255) NOT NULL
 );
 
@@ -13,7 +13,8 @@ CREATE TABLE Customer (
     firstname VARCHAR(100),
 	lastname VARCHAR(100),
 	phone VARCHAR(15),
-    age INT,
+    dob DATE,
+	gender boolean,
     address VARCHAR(200),
     img BYTEA,
     FOREIGN KEY (users_id) REFERENCES "users"(users_id)
@@ -25,8 +26,10 @@ CREATE TABLE Guard (
     users_id INT NOT NULL,
     firstname VARCHAR(100),
 	lastname VARCHAR(100),
-    age INT,
+    dob DATE,
+	status bit,
 	phone VARCHAR(15),
+	gender boolean,
     address VARCHAR(200),
     img BYTEA,
     salary DECIMAL,
@@ -42,38 +45,54 @@ CREATE TABLE Manager (
 
 -- Tạo bảng Booking
 CREATE TABLE Booking (
-    booking_id SERIAL PRIMARY KEY,
-    customer_id INT NOT NULL,
-    manager_id INT NOT NULL,
-    time_start TIMESTAMP,
-    time_end TIMESTAMP,
+    bookingName VARCHAR(100)PRIMARY KEY,
+    customer_id INT,
+    manager_id INT,
+	service VARCHAR(255),
+	address VARCHAR(100),
+	country VARCHAR(100),
     quantity INT,
-	booking_date DATE,
+	booking_date timestamp,
     total_amount DECIMAL(10, 2),
 	status VARCHAR(20),
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (manager_id) REFERENCES Manager(manager_id)
 );
+Create Table DetailBooking(
+	detail_booking_id SERIAL PRIMARY KEY,
+	bookingName VARCHAR(100),
+	time_start timestamp,
+	time_end timestamp,
+	FOREIGN KEY (bookingName) REFERENCES Booking(bookingName)
+);
+Create Table BookingGuard(
+	bookingguardid SERIAL PRIMARY KEY,
+	bookingName VARCHAR(100),
+	guard_id INT NOT NULL,
+	time_end timestamp,
+	FOREIGN KEY (bookingName) REFERENCES Booking(bookingName),
+	FOREIGN KEY (guard_id) REFERENCES Guard(guard_id)
+);
 CREATE TABLE Calendar (
     calendar_id SERIAL PRIMARY KEY,
-    booking_id INT NOT NULL,
+    bookingName VARCHAR(100) NOT NULL,
     customer_id INT NOT NULL,
-    guard_id INT NOT NULL,
-    date DATE,
+    guard_id INT,
+    time_start timestamp,
     status VARCHAR(10),
-    time_checkin TIMESTAMP,
-    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id),
+    time_checkin timestamp,
+    FOREIGN KEY (bookingName) REFERENCES Booking(bookingName),
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (guard_id) REFERENCES Guard(guard_id)
 );
 CREATE TABLE Feedback (
     feedback_id SERIAL PRIMARY KEY,
-    booking_id INT NOT NULL,
+    bookingName VARCHAR(100) NOT NULL,
     customer_id INT NOT NULL,
     guard_id INT NOT NULL,
     rating INT,
     comment TEXT,
-    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id),
+    FOREIGN KEY (bookingName) REFERENCES Booking(bookingName),
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (guard_id) REFERENCES Guard(guard_id)
 );
@@ -81,11 +100,11 @@ CREATE TABLE Feedback (
 CREATE TABLE Payment (
     payment_id SERIAL PRIMARY KEY,
     customer_id INT NOT NULL,
-    booking_id INT NOT NULL,
+    bookingName VARCHAR(100) NOT NULL,
     total DECIMAL(10, 2),
     payment_date DATE,
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
-    FOREIGN KEY (booking_id) REFERENCES Booking(booking_id)
+    FOREIGN KEY (bookingName) REFERENCES Booking(bookingName)
 );
 CREATE TABLE News (
     id SERIAL PRIMARY KEY,

@@ -44,15 +44,26 @@ module.exports = {
         return result.rows[0];
     },
     createBooking: async (userId , newBooking) => {
-      const   { timestart, timeend, quantity, booking_date, total_amount, status } = newBooking ;
-      const rolemanager = 1;
+      // Add data to table Booking.
+      const   { bookingname,service,address,country, total_amount, quantity,dataBooking,booking_date } = newBooking ;
+      const status = "Not yet Payment"
       try {
         // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
         const createBooking = {
-          text: 'INSERT INTO Booking (time_start, time_end, quantity, booking_date, manager_id, total_amount, status ,customer_id) VALUES ($1, $2, $3, $4, $5,$6,$7 ,$8) RETURNING customer_id',
-          values: [timestart, timeend, quantity, booking_date , rolemanager, total_amount, status, userId],
+          text: 'INSERT INTO booking (bookingname,service,address,country,customer_id, quantity, booking_date, total_amount, status ) VALUES ($1, $2, $3, $4, $5,$6,$7 ,$8,$9) RETURNING bookingname',
+          values: [bookingname,service, address, country, userId , quantity,booking_date, total_amount, status],
         };
         await pool.query(createBooking);
+      // Add Data to table Booking Details
+      const bookingName = newBooking.bookingname;
+      for (const detaildata of dataBooking){
+        const {time_start, time_end} = detaildata;
+        const createDetailBooking = {
+          text: 'INSERT INTO detailbooking (bookingname,time_start,time_end) VALUES ($1, $2, $3) RETURNING detail_booking_id',
+          values: [bookingName,time_start, time_end],
+          };
+        await pool.query(createDetailBooking);
+      }
       
       return 'Customer add to new booking';
       } catch (err) {
@@ -61,7 +72,7 @@ module.exports = {
       }
     },
     getmyBooking: async (userId) => {
-      const query = 'SELECT * FROM Booking WHERE customer_id = $1';
+      const query = 'SELECT * FROM booking WHERE customer_id = $1';
       const values = [userId];
       const result = await pool.query(query, values);
       return result.rows;
