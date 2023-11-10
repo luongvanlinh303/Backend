@@ -46,8 +46,8 @@ CREATE TABLE Manager (
 -- Tạo bảng Booking
 CREATE TABLE Booking (
     bookingName VARCHAR(100)PRIMARY KEY,
-    customer_id INT NOT NULL,
-    manager_id INT NOT NULL,
+    customer_id INT,
+    manager_id INT,
 	service VARCHAR(255),
 	address VARCHAR(100),
 	country VARCHAR(100),
@@ -77,7 +77,7 @@ CREATE TABLE Calendar (
     calendar_id SERIAL PRIMARY KEY,
     bookingName VARCHAR(100) NOT NULL,
     customer_id INT NOT NULL,
-    guard_id INT NOT NULL,
+    guard_id INT,
     time_start timestamp,
     status VARCHAR(10),
     time_checkin timestamp,
