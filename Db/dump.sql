@@ -27,7 +27,7 @@ CREATE TABLE Guard (
     firstname VARCHAR(100),
 	lastname VARCHAR(100),
     dob DATE,
-	status bit,
+	status INT,
 	phone VARCHAR(15),
 	gender boolean,
     address VARCHAR(200),
@@ -46,6 +46,7 @@ CREATE TABLE Manager (
 -- Tạo bảng Booking
 CREATE TABLE Booking (
     bookingName VARCHAR(100)PRIMARY KEY,
+    companyname VARCHAR(100),
     customer_id INT,
     manager_id INT,
 	service VARCHAR(255),
@@ -54,7 +55,7 @@ CREATE TABLE Booking (
     quantity INT,
 	booking_date timestamp,
     total_amount DECIMAL(10, 2),
-	status VARCHAR(20),
+	status INT,
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (manager_id) REFERENCES Manager(manager_id)
 );
@@ -79,7 +80,7 @@ CREATE TABLE Calendar (
     customer_id INT NOT NULL,
     guard_id INT,
     time_start timestamp,
-    status VARCHAR(10),
+    status INT,
     time_checkin timestamp,
     FOREIGN KEY (bookingName) REFERENCES Booking(bookingName),
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
