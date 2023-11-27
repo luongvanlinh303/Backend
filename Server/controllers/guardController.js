@@ -19,10 +19,9 @@ module.exports = {
   changeUserInfo: async (req, res) => {
     const userId = req.params.user_id;
     const newInfor = req.body;
-    const imagePath = req.file.path;
 
     try {
-      const result = await Guard.changeInfo(userId, newInfor, imagePath);
+      const result = await Guard.changeInfo(userId, newInfor);
       return res.status(200).json({ message: result });
     } catch (err) {
       console.error("Error:", err);
