@@ -10,13 +10,13 @@ module.exports = {
     const result = await pool.query(query, values);
     return result.rows[0];
   },
-  changeInfo: async (userId, newInfor, imagePath) => {
+  changeInfo: async (userId, newInfor) => {
     const { firstname, lastname, dob, phone, address } = newInfor;
     try {
       // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
       const updateQuery = {
-        text: "UPDATE guard SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5, img = $6 WHERE users_id = $7",
-        values: [firstname, lastname, dob, phone, address, imagePath, userId],
+        text: "UPDATE guard SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5 WHERE users_id = $6",
+        values: [firstname, lastname, dob, phone, address, userId],
       };
       await pool.query(updateQuery);
 
