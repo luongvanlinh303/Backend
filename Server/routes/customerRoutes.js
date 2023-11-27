@@ -97,4 +97,6 @@ router.get('/getDetailBooking/:bookingname', customerController.getDetailBooking
 router.get('/getDetailBookingOneDay', customerController.getDetailBookingOneDay);
 router.post('/createBooking/:user_id', customerController.createBooking);
 router.post('/attendence', customerController.Attendence);
+router.post('/editattendence', customerController.EditGuardAttendence);
+router.post('/payment', customerController.Payment)
 module.exports = router;
