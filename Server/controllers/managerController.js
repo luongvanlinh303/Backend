@@ -31,7 +31,7 @@ module.exports = {
       try {
         const bookingname = req.params.bookingname;
         const result = await Manager.getDetailBooking(bookingname);
-        return res.status(200).json(result);
+        return res.status(200).json(result[0]);
       }
       catch (err) {
         console.error('Error:', err);

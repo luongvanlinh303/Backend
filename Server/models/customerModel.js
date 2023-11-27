@@ -247,4 +247,49 @@ module.exports = {
         throw err;
       }
     },
+    Payment: async (bookingname) => {
+      try {
+    const updatestatus = {
+      text: 'Update booking SET status = 2 WHERE bookingname = $1 RETURNING status',
+      values: [bookingname],
+    };
+    await pool.query(updatestatus);
+    return "Payment success";
+      }
+      catch(err){
+        console.error('Error:', err);
+        throw err;
+      }
+    },
+    EditGuardAttendence: async (bookingname,inforAttendence) => {
+      const { bookingName,customer_id ,dataBooking, guard } = inforAttendence;
+      try {
+        const querydelete = {
+          text: 'delete from bookingguard where bookingname = $1',
+          values: [bookingname]
+        };
+        await pool.query(querydelete);
+        for (const guardItem of guard) {
+          const { guard_id, status } = guardItem;
+  
+          // Thực hiện truy vấn INSERT để thêm dữ liệu vào bảng "Calendar"
+          const insertQuery = `
+            INSERT INTO calendar (bookingname, customer_id,time_start, time_checkin, guard_id, status)
+            VALUES ($1, $2, $3, $4, $5,$6)
+          `; const calendarValues = [
+            bookingName,
+            customer_id,
+            dataBooking.time_start,
+            dataBooking.time_end,
+            guard_id,
+            status
+          ];
+          await pool.query(insertQuery, calendarValues);
+    }
+    return "Edit Attendence success";
+      }catch(err) {
+        console.error('Lỗi:', err);
+        throw err;
+      }
+    },
 };    

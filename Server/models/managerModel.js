@@ -38,12 +38,15 @@ module.exports = {
           const bookingquery = 'SELECT * FROM booking WHERE bookingname = $1'
           const query = 'SELECT time_start,time_end FROM detailbooking WHERE bookingname = $1';
           const bookingguard = 'SELECT Bookingguard.guard_id, guard.firstname,guard.lastname from Bookingguard INNER JOIN guard ON Bookingguard.guard_id = guard.guard_id WHERE Bookingguard.bookingname = $1';
+          const customerinfor = 'SELECT customer.customer_id, customer.firstname,customer.lastname, users.email from Customer INNER JOIN booking ON booking.customer_id = customer.customer_id INNER JOIN users ON users.users_id = customer.users_id WHERE booking.bookingname = $1'
           const values = [bookingname];
           const resultbooking = await pool.query(bookingquery, values);
           const resultdetail = await pool.query(query, values);
           const resultbookingguard = await pool.query(bookingguard,values);
+          const resultcustomerinfor = await pool.query(customerinfor,values)
           
           const bookings = resultbooking.rows.map(bookingRow => {
+            const customer = resultcustomerinfor.rows;
             const dataBooking = resultdetail.rows;
             if(resultbookingguard.rows === null){
               return {
@@ -54,6 +57,7 @@ module.exports = {
                 status: bookingRow.status,
                 total_amount: bookingRow.total_amount,
                 quantity: bookingRow.quantity,
+                customer: customer[0],
                 booking_date: bookingRow.booking_date,
                 dataBooking: dataBooking,
                 guard: "Manager chưa phân bổ Guard",
@@ -69,6 +73,7 @@ module.exports = {
               status: bookingRow.status,
               total_amount: bookingRow.total_amount,
               quantity: bookingRow.quantity,
+              customer: customer[0],
               booking_date: bookingRow.booking_date,
               dataBooking: dataBooking,
               guard: guards,
