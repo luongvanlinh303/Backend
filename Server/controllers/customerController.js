@@ -142,10 +142,9 @@ module.exports = {
       }
     },
     EditGuardAttendence:async (req, res) => {
-      const bookingname = req.body.bookingname;
       const inforAttendence = req.body;
       try {
-        const EditAttendence = await Customer.Attendence(inforAttendence,bookingname);
+        const EditAttendence = await Customer.EditGuardAttendence(inforAttendence);
         if (!EditAttendence) {
           return res.status(404).json({ error: 'Detail Booking not found' });
         }

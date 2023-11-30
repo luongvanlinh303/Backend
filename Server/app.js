@@ -5,11 +5,11 @@ const authRoutes = require('./routes/authRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const guardRoutes = require('./routes/guardRoutes');
 const managerRoutes = require('./routes/managerRoutes');
+const cors = require('cors');
 const app = express();
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }),cors());
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-var cors = require('cors')
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -28,7 +28,7 @@ app.use('/auth', authRoutes);
 app.use('/customer', customerRoutes);
 app.use('/guard', guardRoutes);
 app.use('/manager', managerRoutes);
-app.use(cors())
+
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
   require('child_process').exec('start http://localhost:3000/api-docs');

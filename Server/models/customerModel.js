@@ -87,8 +87,6 @@ module.exports = {
       }
     },
     getmyBooking: async (userId) => {
-      // const query = 'SELECT * FROM booking WHERE customer_id = $1';
-      // const querydetail = 'SELECT time_start,time_end FROM detailbooking WHERE bookingname = $1';
       const query ='SELECT booking.companyname,detailbooking.time_start,detailbooking.time_end FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname WHERE customer_id = $1'
       const values = [userId];
       const result = await pool.query(query, values);
@@ -261,13 +259,14 @@ module.exports = {
         throw err;
       }
     },
-    EditGuardAttendence: async (bookingname,inforAttendence) => {
-      const { bookingName,customer_id ,dataBooking, guard } = inforAttendence;
+    EditGuardAttendence: async (inforAttendence) => {
+      const {bookingName,customer_id ,dataBooking, guard } = inforAttendence;
       try {
         const querydelete = {
-          text: 'delete from bookingguard where bookingname = $1',
-          values: [bookingname]
+          text: 'delete from calendar where bookingname = $1 and time_start = $2 and time_checkin = $3',
+          values: [bookingName,dataBooking.time_start, dataBooking.time_end]
         };
+
         await pool.query(querydelete);
         for (const guardItem of guard) {
           const { guard_id, status } = guardItem;
