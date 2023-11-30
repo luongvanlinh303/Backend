@@ -53,4 +53,61 @@ module.exports = {
         res.status(500).json({ error: 'Internal server error' });
       }
     },
+    getDetailBooking: async (req, res) => {
+      const bookingname = req.params.bookingname;
+      try {
+        const detailbooking = await Guard.getDetailBooking(bookingname);
+        if (!detailbooking) {
+          return res.status(404).json({ error: 'Detail Booking not found' });
+        }
+        res.json(detailbooking);
+      }
+      catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    },
+    getDetailBookingOneDay:async (req, res) => {
+      const bookingname = req.query.bookingname;
+      const time_start = req.query.time_start;
+      const time_end = req.query.time_end;
+      try {
+        const detailbooking = await Guard.getDetailBookingOneDay(bookingname,time_start,time_end);
+        if (!detailbooking) {
+          return res.status(404).json({ error: 'Detail Booking not found' });
+        }
+        res.json(detailbooking);
+      }
+      catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    },
+    getListMyBooking:async (req, res) => {
+      const guard_id = req.params.user_id;
+      try {
+        const detailbooking = await Guard.getListMyBooking(guard_id);
+        if (!detailbooking) {
+          return res.status(404).json({ error: 'Detail Booking not found' });
+        }
+        res.json(detailbooking);
+      }
+      catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    },
+    getmyBooking: async (req, res) => {
+      const userId = req.params.user_id;
+      try {
+        const booking = await Guard.getmyBooking(userId);
+        if (!booking) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(booking);
+      } catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    },
 };
