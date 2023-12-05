@@ -204,4 +204,44 @@ module.exports = {
           throw err;
         }
       },
+      getGuardById: async (userId) => {
+        const query = 'SELECT * FROM Guard WHERE guard_id = $1';
+        const values = [userId];
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    },
+      getCustomerById: async (userId) => {
+        const query = 'SELECT * FROM customer WHERE customer_id = $1';
+        const values = [userId];
+    
+        const result = await pool.query(query, values);
+        return result.rows[0];
+      },
+      postNews: async (news) => {
+        const {title, content, publish_date, manager_id} = news;
+        try {
+          const News = {
+            text: 'INSERT INTO news (title, content, publish_date, manager_id) VALUES ($1, $2, $3,$4)',
+            values: [title, content, publish_date, manager_id],
+          };
+          await pool.query(News);
+          return "Create News success";
+            }
+            catch(err){
+              console.error('Error:', err);
+              throw err;
+            }
+      },
+      getAllNews: async () => {
+
+        try {
+          const query = 'SELECT * FROM News';
+          const result = await pool.query(query);
+      
+          return result.rows;
+        } catch (err) {
+          console.error('Error:', err);
+          throw err;
+        }
+      },
     }; 

@@ -110,4 +110,14 @@ module.exports = {
         res.status(500).json({ error: 'Internal server error' });
       }
     },
+    getMyFeedBack: async (req, res) => {
+      const userId = req.params.user_id;
+      try {
+        const feedback = await Guard.getMyFeedBack(userId);
+        return res.status(200).json(feedback);
+      } catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    }
 };
