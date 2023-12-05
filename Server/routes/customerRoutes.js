@@ -95,8 +95,10 @@ router.get('/getInfoGuardbyID/:user_id', customerController.getInfoGuardbyID);
 router.get('/getmyBooking/:user_id', customerController.getmyBooking);
 router.get('/getDetailBooking/:bookingname', customerController.getDetailBooking);
 router.get('/getDetailBookingOneDay', customerController.getDetailBookingOneDay);
+router.get('/gettoprank', customerController.GetFeedBack);
 router.post('/createBooking/:user_id', customerController.createBooking);
 router.post('/attendence', customerController.Attendence);
 router.post('/editattendence', customerController.EditGuardAttendence);
 router.post('/payment', customerController.Payment)
+router.post('/feedback', customerController.PostFeedBack)
 module.exports = router;

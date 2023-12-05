@@ -14,4 +14,5 @@ router.get('/getDetailBooking/:bookingname', GuardController.getDetailBooking);
 router.get('/getDetailBookingOneDay', GuardController.getDetailBookingOneDay);
 router.get('/getListMyBooking/:user_id', GuardController.getListMyBooking);
 router.get('/getmyBooking/:user_id', GuardController.getmyBooking);
+router.get('/getmyFeedback/:user_id', GuardController.getMyFeedBack);
 module.exports = router;

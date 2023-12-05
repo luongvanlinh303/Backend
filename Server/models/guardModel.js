@@ -276,18 +276,25 @@ module.exports = {
     }
   },
   getmyBooking: async (userId) => {
-    const query = 'SELECT booking.companyname,detailbooking.time_start,detailbooking.time_end FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname INNER JOIN bookingguard ON detailbooking.bookingname = bookingguard.bookingname  WHERE bookingguard.guard_id = $1'
+    const query = 'SELECT booking.companyname,booking.customer_id,detailbooking.time_start,detailbooking.time_end FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname INNER JOIN bookingguard ON detailbooking.bookingname = bookingguard.bookingname  WHERE bookingguard.guard_id = $1'
     const values = [userId];
     const result = await pool.query(query, values);
 
     const bookings = result.rows.map(booking1 => {
       return {
         companyname: booking1.companyname,
+        customer_id: booking1.customer_id,
         time_start: booking1.time_start,
         time_end: booking1.time_end
       }
     });
     return bookings;
 
+  },
+  getMyFeedBack:async (userId) => {
+    const query = 'SELECT * FROM feedback WHERE guard_id = $1';
+    const values = [userId];
+    const result = await pool.query(query, values);
+    return result.rows;
   },
 };    

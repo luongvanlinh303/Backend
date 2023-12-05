@@ -291,4 +291,29 @@ module.exports = {
         throw err;
       }
     },
+    PostFeedBack: async (dataFeedback) => {
+      const {bookingname, customer_id,guard_id,rating,comment} = dataFeedback;
+      try {
+    const Feedback = {
+      text: 'INSERT INTO feedback (bookingname,customer_id,guard_id,rating,comment) VALUES ($1, $2, $3,$4,$5) RETURNING bookingname',
+      values: [bookingname, customer_id,guard_id,rating,comment],
+    };
+    await pool.query(Feedback);
+    return "Feedback success";
+      }
+      catch(err){
+        console.error('Error:', err);
+        throw err;
+      }
+    },
+    GetFeedBack: async()=>{
+      try {
+        const query = 'SELECT feedback.guard_id, Guard.firstname, Guard.lastname, FLOOR(AVG(feedback.rating)) AS avgrating FROM feedback JOIN Guard ON Guard.guard_id = feedback.guard_id GROUP BY feedback.guard_id, Guard.firstname, Guard.lastname ORDER BY avgrating DESC Limit 3';
+        const result = await pool.query(query);
+        return result.rows;
+      } catch (err) {
+        console.error('Error:', err);
+        throw err;
+      }
+    }
 };    

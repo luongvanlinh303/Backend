@@ -166,4 +166,24 @@ module.exports = {
         res.status(500).json({ error: 'Internal server error' });
       }
     },
+    PostFeedBack:async (req, res) => {
+      const dataFeedback = req.body;
+      try {
+        const Feedback = await Customer.PostFeedBack(dataFeedback);
+        res.json(Feedback);
+      }
+      catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    },
+    GetFeedBack: async (req, res) => {
+      try {
+        const result = await Customer.GetFeedBack();
+        return res.status(200).json(result);
+      } catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
 };
