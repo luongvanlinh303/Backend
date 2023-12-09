@@ -28,7 +28,7 @@ module.exports = {
       const result = await pool.query(query);
       return result.rows;
         }
-        catch(err){
+        catch(err){date
           console.error('Error:', err);
           throw err;
         }
@@ -159,6 +159,18 @@ module.exports = {
       },
       EditGuardBooking: async (bookingname, listguard) => {
         try {
+          const getGuardIdsQuery = {
+            text: 'SELECT guard_id FROM bookingguard WHERE bookingname = $1',
+            values: [bookingname],
+          };
+          const result =  await pool.query(getGuardIdsQuery);
+          const guardIds = result.rows.map((row) => row.guard_id);
+          const updateGuardQuery = {
+            text: 'UPDATE guard SET status = 1 WHERE guard_id = ANY($1)',
+            values: [ guardIds],
+          };
+          await pool.query(updateGuardQuery);
+
           const querydelete = {
             text: 'delete from bookingguard where bookingname = $1',
             values: [bookingname]
@@ -235,13 +247,68 @@ module.exports = {
       getAllNews: async () => {
 
         try {
-          const query = 'SELECT * FROM News';
+          const query = 'SELECT * FROM News ORDER By id DESC';
           const result = await pool.query(query);
       
           return result.rows;
         } catch (err) {
           console.error('Error:', err);
           throw err;
+        }
+      },
+      editNews: async (news) => {
+        const {id,title, content, publish_date, manager_id} = news;
+        try {
+          // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
+          const updateQuery = {
+            text: 'UPDATE news SET title = $1, content = $2, publish_date = $3, manager_id = $4 WHERE id = $5',
+            values: [title, content, publish_date, manager_id, id],
+          };
+          await pool.query(updateQuery);
+        
+        return 'News updated successfully';
+        } catch (err) {
+          console.error('Error:', err);
+          throw new Error('An error occurred');
+        }
+      },
+      getTop4News: async () => {
+
+        try {
+          const query = 'SELECT * FROM News ORDER By id DESC LIMIT 4';
+          const result = await pool.query(query);
+      
+          return result.rows;
+        } catch (err) {
+          console.error('Error:', err);
+          throw err;
+        }
+      },
+      getDetailNews: async (news_id) => {
+
+        try {
+          const query = 'SELECT * FROM News WHERE id = $1';
+          const values = [news_id];
+          const result = await pool.query(query,values);
+      
+          return result.rows;
+        } catch (err) {
+          console.error('Error:', err);
+          throw err;
+        }
+      },
+      deleteNews: async (news_id) => {
+        try {
+          const deleteQuery = {
+            text: 'Delete from news WHERE id = $1',
+            values: [news_id],
+          };
+          await pool.query(deleteQuery);
+        
+        return 'News deleted successfully';
+        } catch (err) {
+          console.error('Error:', err);
+          throw new Error('An error occurred');
         }
       },
     }; 
