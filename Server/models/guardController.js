@@ -1,123 +1,50 @@
-const Guard = require('../models/guardModel');
-const crypto = require('crypto');
-const secretKey = crypto.randomBytes(64).toString('hex');
+const pool = require('../config/dbConfig');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 module.exports = {
-    getUserById: async (req, res) => {
-        const userId = req.params.user_id;
-        try {
-          const user = await Guard.getUserById(userId);
-          if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-          }
-          res.json(user);
-        } catch (error) {
-          console.error('Error retrieving user', error);
-          res.status(500).json({ error: 'Internal server error' });
-        }
+    getUserById: async (userId) => {
+        const query = 'SELECT * FROM guard WHERE users_id = $1';
+        const values = [userId];
+    
+        const result = await pool.query(query, values);
+        return result.rows[0];
       },
-    changeUserInfo: async (req, res) => {
-      const userId = req.params.user_id; 
-      const newInfor = req.body;
-
-    try {
-      const result = await Guard.changeInfo(userId, newInfor);
-      return res.status(200).json({ message: result });
-    } catch (err) {
-      console.error('Error:', err);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
-    },
-    changeUserImg: async (req, res) => {
-      const userId = req.params.user_id; 
-      const imagePath = req.file.path;
-
-    try {
-      const result = await Guard.changeImg(userId,imagePath);
-      return res.status(200).json({ message: result });
-    } catch (err) {
-      console.error('Error:', err);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
-    },
-    getInfoCustomerbyID: async (req, res) => {
-      const userId = req.params.user_id;
+    changeInfo: async (userId , newInfor) => {
+      const { firstname, lastname, dob, phone, address } = newInfor;
       try {
-        const user = await Customer.getInfoCustomerbyID(userId);
-        if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-        res.json(user);
-      } catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
+        // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
+        const updateQuery = {
+          text: 'UPDATE guard SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5 WHERE users_id = $6',
+          values: [firstname, lastname, dob, phone, address, userId],
+        };
+        await pool.query(updateQuery);
+      
+      return 'Guard information updated successfully';
+      } catch (err) {
+        console.error('Error:', err);
+        throw new Error('An error occurred');
       }
-    },
-    getDetailBooking: async (req, res) => {
-      const bookingname = req.params.bookingname;
+     },
+     changeImg: async (userId ,imagePath) => {
       try {
-        const detailbooking = await Guard.getDetailBooking(bookingname);
-        if (!detailbooking) {
-          return res.status(404).json({ error: 'Detail Booking not found' });
-        }
-        res.json(detailbooking);
+        // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
+        const updateQuery = {
+          text: 'UPDATE guard SET img = $1 WHERE users_id = $2',
+          values: [imagePath, userId],
+        };
+        await pool.query(updateQuery);
+      
+      return 'Guard information updated successfully';
+      } catch (err) {
+        console.error('Error:', err);
+        throw new Error('An error occurred');
       }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    getDetailBookingOneDay:async (req, res) => {
-      const bookingname = req.query.bookingname;
-      const time_start = req.query.time_start;
-      const time_end = req.query.time_end;
-      try {
-        const detailbooking = await Guard.getDetailBookingOneDay(bookingname,time_start,time_end);
-        if (!detailbooking) {
-          return res.status(404).json({ error: 'Detail Booking not found' });
-        }
-        res.json(detailbooking);
-      }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    getListMyBooking:async (req, res) => {
-      const guard_id = req.params.user_id;
-      try {
-        const detailbooking = await Guard.getListMyBooking(guard_id);
-        if (!detailbooking) {
-          return res.status(404).json({ error: 'Detail Booking not found' });
-        }
-        res.json(detailbooking);
-      }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    getmyBooking: async (req, res) => {
-      const userId = req.params.user_id;
-      try {
-        const booking = await Guard.getmyBooking(userId);
-        if (!booking) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-        res.json(booking);
-      } catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    getMyFeedBack: async (req, res) => {
-      const userId = req.params.user_id;
-      try {
-        const feedback = await Guard.getMyFeedBack(userId);
-        return res.status(200).json(feedback);
-      } catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    }
-};
+     },
+     getInfoCustomerbyID: async (userId) => {
+      const query = 'SELECT * FROM customer WHERE users_id = $1';
+      const values = [userId];
+      const result = await pool.query(query, values);
+      return result.rows[0];
+  },
+};    

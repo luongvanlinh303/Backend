@@ -141,49 +141,5 @@ module.exports = {
         res.status(500).json({ error: 'Internal server error' });
       }
     },
-    EditGuardAttendence:async (req, res) => {
-      const inforAttendence = req.body;
-      try {
-        const EditAttendence = await Customer.EditGuardAttendence(inforAttendence);
-        if (!EditAttendence) {
-          return res.status(404).json({ error: 'Detail Booking not found' });
-        }
-        res.json(EditAttendence);
-      }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    Payment:async (req, res) => {
-      const bookingname = req.body.bookingname;
-      try {
-        const Payment = await Customer.Payment(bookingname);
-        res.json(Payment);
-      }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    PostFeedBack:async (req, res) => {
-      const dataFeedback = req.body;
-      try {
-        const Feedback = await Customer.PostFeedBack(dataFeedback);
-        res.json(Feedback);
-      }
-      catch (error) {
-        console.error('Error retrieving user', error);
-        res.status(500).json({ error: 'Internal server error' });
-      }
-    },
-    GetFeedBack: async (req, res) => {
-      try {
-        const result = await Customer.GetFeedBack();
-        return res.status(200).json(result);
-      } catch (err) {
-        console.error('Error:', err);
-        return res.status(500).json({ message: 'An error occurred' });
-      } 
-    },
+
 };
