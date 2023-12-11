@@ -1,7 +1,7 @@
 // routes/authRoutes.js
 const express = require('express');
 const authenticate = require('../middlewares/authenticate');
-const authController = require('../controllers/authController');
+const authController = require('git controllers/authController');
 
 const router = express.Router();
 /**
