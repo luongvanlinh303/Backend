@@ -1,7 +1,7 @@
 // routes/authRoutes.js
 const express = require('express');
 const authenticate = require('../middlewares/authenticate');
-const authController = require('/Backend/Server/controller/authController.js');
+const authController = require('../controllers/authController.js');
 
 const router = express.Router();
 /**
