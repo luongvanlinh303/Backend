@@ -29,7 +29,7 @@ app.use('/customer', customerRoutes);
 app.use('/guard', guardRoutes);
 app.use('/manager', managerRoutes);
 
-app.listen(3003, () => {
-  console.log('Server is running on port 3003');
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
   require('child_process').exec('start http://localhost:3000/api-docs');
 });
