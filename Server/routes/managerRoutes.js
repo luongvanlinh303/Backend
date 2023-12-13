@@ -17,7 +17,17 @@ router.get('/GetSalaryGuard/:guard_id',managerController.GetSalaryGuard);
 router.get('/getCustomerById/:customer_id', managerController.getCustomerById);
 router.get('/getGuardById/:guard_id', managerController.getGuardById);
 router.get('/getAllNews', managerController.getAllNews);
+router.get('/getTop4News', managerController.getTop4News);
+router.get('/getDetailNews/:news_id', managerController.getDetailNews);
 router.post('/PickGuard/:bookingname', managerController.PickGuard);
+router.post('/postEnoughGuard/:bookingname', managerController.postEnoughGuard);
 router.post('/EditGuardBooking/:bookingname', managerController.EditGuardBooking);
 router.post('/postNews', managerController.postNews);
+router.post('/editNews', managerController.editNews);
+router.post('/deleteNews/:news_id', managerController.deleteNews);
+router.get('/dashboard/summary', managerController.summary);
+router.get('/searchGuard', managerController.SearchGuard);
+router.get('/searchCustomer', managerController.SearchCustomer);
+router.get('/filterByStatus', managerController.filterByStatus);
+router.get('/getMyNoti',managerController.getMyNoti)
 module.exports = router;

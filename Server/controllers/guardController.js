@@ -119,5 +119,17 @@ module.exports = {
         console.error('Error retrieving user', error);
         res.status(500).json({ error: 'Internal server error' });
       }
+    },
+    getMyNoti: async (req, res) => {
+      const guard_id = req.params.guard_id;
+      try {
+        const result = await Guard.getMyNoti(guard_id);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
     }
+
 };

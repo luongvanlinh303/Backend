@@ -50,7 +50,7 @@ module.exports = {
   getDetailBooking: async (bookingname) => {
     try {
       const bookingquery = 'SELECT * FROM booking WHERE bookingname = $1'
-      const query = 'SELECT time_start,time_end FROM detailbooking WHERE bookingname = $1';
+      const query = 'SELECT time_start,time_end,staus FROM detailbooking INNER JOIN calendar ON calendar.bookingname =detailbooking.bookingname AND calendar.time_start =detailbooking.time_start AND calendar.time_checkin =detailbooking.time_end  WHERE bookingname = $1';
       const bookingguard = 'SELECT Bookingguard.guard_id, guard.firstname,guard.lastname from Bookingguard INNER JOIN guard ON Bookingguard.guard_id = guard.guard_id WHERE Bookingguard.bookingname = $1';
       const values = [bookingname];
       const resultbooking = await pool.query(bookingquery, values);
@@ -276,17 +276,29 @@ module.exports = {
     }
   },
   getmyBooking: async (userId) => {
-    const query = 'SELECT booking.companyname,booking.customer_id,detailbooking.time_start,detailbooking.time_end FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname INNER JOIN bookingguard ON detailbooking.bookingname = bookingguard.bookingname  WHERE bookingguard.guard_id = $1'
+    const query = 'SELECT booking.bookingname,booking.companyname,booking.customer_id,detailbooking.time_start,detailbooking.time_end FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname INNER JOIN bookingguard ON detailbooking.bookingname = bookingguard.bookingname  WHERE bookingguard.guard_id = $1'
+    // const query = 'SELECT booking.companyname,booking.customer_id,detailbooking.time_start,detailbooking.time_end,calendar.status FROM booking INNER JOIN detailbooking ON booking.bookingname = detailbooking.bookingname INNER JOIN bookingguard ON detailbooking.bookingname = bookingguard.bookingname INNER JOIN calendar ON bookingguard.bookingname = calendar.bookingname WHERE bookingguard.guard_id = $1'
     const values = [userId];
     const result = await pool.query(query, values);
 
     const bookings = result.rows.map(booking1 => {
       return {
+        
         companyname: booking1.companyname,
         customer_id: booking1.customer_id,
         time_start: booking1.time_start,
-        time_end: booking1.time_end
+        time_end: booking1.time_end,
+        bookingname: booking1.bookingname,
+        status: null
       }
+    });
+    const booking = bookings[0].bookingname;
+    console.log(booking);
+    const query1 = 'SELECT calendar.status FROM detailbooking INNER JOIN calendar ON calendar.bookingname =detailbooking.bookingname AND calendar.time_start =detailbooking.time_start AND calendar.time_checkin = detailbooking.time_end  WHERE detailbooking.bookingname = $1 AND calendar.guard_id = $2';
+    const valuess = [booking,userId];
+    const result1 = await pool.query(query1, valuess);
+    result1.rows.forEach((row, index) => {
+      bookings[index].status = row.status;
     });
     return bookings;
 
@@ -296,5 +308,17 @@ module.exports = {
     const values = [userId];
     const result = await pool.query(query, values);
     return result.rows;
+  },
+  getMyNoti: async(guard_id) => {
+    try{
+      const query = 'select * From notiguard where guard_id = $1 order by noticus_id desc';
+      const values = [guard_id]
+      const result = await pool.query(query,values);
+      return result.rows;
+    }
+    catch(err){
+      console.error('Error:', err);
+      throw err;
+    }
   },
 };    

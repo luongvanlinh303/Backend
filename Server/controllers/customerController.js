@@ -186,4 +186,37 @@ module.exports = {
         return res.status(500).json({ message: 'An error occurred' });
       } 
     },
+    getBookingNotPayment: async (req, res) => {
+      const customer_id = req.params.customer_id;
+      try {
+        const result = await Customer.getBookingNotPayment(customer_id);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
+    getMyNoti: async (req, res) => {
+      const customer_id = req.params.customer_id;
+      try {
+        const result = await Customer.getMyNoti(customer_id);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
+    CancelBooking: async (req, res) => {
+      const bookingname = req.params.bookingname;
+      try {
+        const result = await Customer.CancelBooking(bookingname);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
 };

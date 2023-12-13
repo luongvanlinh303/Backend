@@ -99,6 +99,10 @@ router.get('/gettoprank', customerController.GetFeedBack);
 router.post('/createBooking/:user_id', customerController.createBooking);
 router.post('/attendence', customerController.Attendence);
 router.post('/editattendence', customerController.EditGuardAttendence);
-router.post('/payment', customerController.Payment)
-router.post('/feedback', customerController.PostFeedBack)
+router.post('/payment', customerController.Payment);
+router.post('/feedback', customerController.PostFeedBack);
+router.post('/CancelBooking/:bookingname', customerController.CancelBooking);
+router.get('/getBookingNotPayment/:customer_id',customerController.getBookingNotPayment);
+router.get('/getMyNoti/:customer_id',customerController.getMyNoti)
+
 module.exports = router;
