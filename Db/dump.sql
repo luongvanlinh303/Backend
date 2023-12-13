@@ -115,3 +115,39 @@ CREATE TABLE News (
     manager_id INT,
     FOREIGN KEY (manager_id) REFERENCES Manager(manager_id)
 );
+CREATE TABLE NotiCus (
+    noticus_id SERIAL PRIMARY KEY,
+    customer_id INT,
+    guard_id INT,
+    bookingname VARCHAR(100) NOT NULL,
+    content TEXT,
+    publish_date DATE,
+    manager_id INT,
+    type VARCHAR(100),
+    time_start DATE,
+    time_end DATE
+);
+CREATE TABLE NotiGuard (
+    noticus_id SERIAL PRIMARY KEY,
+    customer_id INT,
+    guard_id INT,
+    bookingname VARCHAR(100) NOT NULL,
+    content TEXT,
+    publish_date DATE,
+    manager_id INT,
+    type VARCHAR(100),
+    time_start DATE,
+    time_end DATE
+);
+CREATE TABLE NotiManager (
+    noticus_id SERIAL PRIMARY KEY,
+    customer_id INT,
+    guard_id INT,
+    bookingname VARCHAR(100) NOT NULL,
+    content TEXT,
+    publish_date DATE,
+    manager_id INT,
+    type VARCHAR(100),
+    time_start DATE,
+    time_end DATE
+);
