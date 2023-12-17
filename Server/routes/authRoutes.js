@@ -106,7 +106,7 @@ router.post('/login', authController.login);
  *       500:
  *         description: Internal server error
  */
-router.post('/changePassword', authController.changePassword);
+
 /**
  * @swagger
  * /resetPassword:

@@ -427,14 +427,18 @@ module.exports = {
           const queryCustomer = 'SELECT COUNT(*) FROM Customer';
           const queryGuard = 'SELECT COUNT(*) FROM Guard';
           const queryBooking = 'SELECT SUM(total_amount) , COUNT(bookingName)  FROM Booking';
+          const querySalary = 'SELECT SUM(salary) FROM Guard'
           const resultCustomer = await pool.query(queryCustomer);
           const resultGuard = await pool.query(queryGuard);
           const resultBooking = await pool.query(queryBooking);
+          const resultSalary = await pool.query(querySalary);
           const statistics = [{
             totalCustomer: resultCustomer.rows[0].count,
             totalGuard: resultGuard.rows[0].count,
             total_booking: resultBooking.rows[0].count,
             total_amount: resultBooking.rows[0].sum,
+            total_salary: resultSalary.rows[0].sum,
+            total_profit:resultBooking.rows[0].sum - resultSalary.rows[0].sum
           }
           ];
           return statistics;

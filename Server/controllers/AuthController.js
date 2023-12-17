@@ -40,17 +40,7 @@ module.exports = {
       return res.status(500).json({ message: 'An error occurred' });
     }
   },
-  changePassword : async (req, res) => {
-    const { userId, currentPasswd, newPasswd , confirmNewpasswd} = req.body;
   
-    try {
-      const message = await User.changePassword(userId, currentPasswd, newPasswd, confirmNewpasswd);
-      return res.status(200).json({ message });
-    } catch (err) {
-      console.error('Error:', err);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
-  },
   
   resetPassword : async (req, res) => {
     const { userId, newPasswd } = req.body;

@@ -4,45 +4,87 @@ const jwt = require('jsonwebtoken');
 
 module.exports = {
   getUserById: async (userId) => {
-    const query = 'SELECT * FROM guard WHERE users_id = $1';
+    const query = 'SELECT * FROM guard WHERE guard_id = $1';
     const values = [userId];
 
     const result = await pool.query(query, values);
     return result.rows[0];
   },
-  changeInfo: async (userId, newInfor) => {
-    const { firstname, lastname, dob, phone, address } = newInfor;
+  changeInfo: async (userId , newInfor) => {
+    const { firstname, lastname, dob, phone, address,gender } = newInfor;
     try {
       // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
       const updateQuery = {
-        text: 'UPDATE guard SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5 WHERE users_id = $6',
-        values: [firstname, lastname, dob, phone, address, userId],
+        text: 'UPDATE customer SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5, gender=$6 WHERE guard_id = $7',
+        values: [firstname, lastname, dob, phone, address,gender, userId],
       };
       await pool.query(updateQuery);
-
-      return 'Guard information updated successfully';
+    
+    return 'Customer information updated successfully';
+    } catch (err) {
+      console.error('Error:', err);
+      throw new Error('An error occurred');
+    }
+    },
+  changePassword: async (userId, currentPasswd, newPasswd, confirmNewpasswd) => {
+    try {
+      // Lấy thông tin người dùng từ cơ sở dữ liệu
+      const userQuery = {
+        text: 'SELECT passwd FROM users INNER JOIN Guard on Guard.users_id = users.users_id WHERE guard_id = $1',
+        values: [userId],
+      };
+      const result = await pool.query(userQuery);
+      const hashedPassword = result.rows[0].passwd;
+  
+      // So sánh mật khẩu hiện tại
+      const isPasswordMatched = await bcrypt.compare(currentPasswd, hashedPassword);
+      if (!isPasswordMatched) {
+        throw new Error('Current password is incorrect');
+      }
+  
+      // Hash mật khẩu mới
+      const newHashedPassword = await bcrypt.hash(newPasswd, 10);
+      const confirmNewHashedPassword = await bcrypt.hash(confirmNewpasswd, 10);
+      // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+      if (newPasswd == confirmNewpasswd){
+        const userQuery = {
+          text: 'SELECT users.users_id FROM users INNER JOIN Guard on Guard.users_id = users.users_id WHERE guard_id = $1',
+          values: [userId],
+        };
+        const result = await pool.query(userQuery);
+        const resultuser = result.rows[0].users_id;
+        const updateQuery = {
+        text: 'UPDATE users SET passwd = $1  WHERE users_id = $2',
+        values: [newHashedPassword, resultuser],
+      };
+      await pool.query(updateQuery);
+      return 'Password changed successfully';
+    }
+      else {
+        return 'Password confirm different with new password';
+      }
+      
     } catch (err) {
       console.error('Error:', err);
       throw new Error('An error occurred');
     }
   },
-  changeImg: async (userId, imagePath) => {
+  changeImg: async (userId, imageUrl) => {
     try {
-      // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
       const updateQuery = {
-        text: 'UPDATE guard SET img = $1 WHERE users_id = $2',
-        values: [imagePath, userId],
+        text: 'UPDATE guard SET img = $1 WHERE guard_id = $2',
+        values: [imageUrl, userId],
       };
       await pool.query(updateQuery);
 
-      return 'Guard information updated successfully';
+      return 'guard image updated successfully';
     } catch (err) {
       console.error('Error:', err);
       throw new Error('An error occurred');
     }
   },
   getInfoCustomerbyID: async (userId) => {
-    const query = 'SELECT * FROM customer WHERE users_id = $1';
+    const query = 'SELECT * FROM customer WHERE customer_id = $1';
     const values = [userId];
     const result = await pool.query(query, values);
     return result.rows[0];
