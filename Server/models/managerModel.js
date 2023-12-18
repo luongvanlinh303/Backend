@@ -426,19 +426,21 @@ module.exports = {
         try {
           const queryCustomer = 'SELECT COUNT(*) FROM Customer';
           const queryGuard = 'SELECT COUNT(*) FROM Guard';
-          const queryBooking = 'SELECT SUM(total_amount) , COUNT(bookingName)  FROM Booking';
-          const querySalary = 'SELECT SUM(salary) FROM Guard'
+          const queryBooking = 'SELECT SUM(total_amount) FROM Booking WHERE status IN (0, 2)';
+          const queryBooking2 = 'SELECT COUNT(bookingName) FROM Booking';
+          const querySalary = 'SELECT SUM(salary) FROM Guard WHERE status= 0'
           const resultCustomer = await pool.query(queryCustomer);
           const resultGuard = await pool.query(queryGuard);
           const resultBooking = await pool.query(queryBooking);
+          const resultBooking2 = await pool.query(queryBooking2);
           const resultSalary = await pool.query(querySalary);
           const statistics = [{
             totalCustomer: resultCustomer.rows[0].count,
             totalGuard: resultGuard.rows[0].count,
-            total_booking: resultBooking.rows[0].count,
-            total_amount: resultBooking.rows[0].sum,
-            total_salary: resultSalary.rows[0].sum,
-            total_profit:resultBooking.rows[0].sum - resultSalary.rows[0].sum
+            total_booking: resultBooking2.rows[0].count,
+            total_amount: parseInt(resultBooking.rows[0].sum),
+            total_salary: parseInt(resultSalary.rows[0].sum),
+            total_profit:parseInt(resultBooking.rows[0].sum - resultSalary.rows[0].sum)
           }
           ];
           return statistics;

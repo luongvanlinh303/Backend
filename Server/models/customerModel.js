@@ -169,17 +169,24 @@ module.exports = {
         const bookingquery = 'SELECT * FROM booking WHERE bookingname = $1'
         const query = 'SELECT time_start,time_end FROM detailbooking WHERE bookingname = $1';
         const bookingguard = 'SELECT Bookingguard.guard_id, guard.firstname,guard.lastname from Bookingguard INNER JOIN guard ON Bookingguard.guard_id = guard.guard_id WHERE Bookingguard.bookingname = $1';
+        const customer = 'SELECT customer.firstname, customer.lastname, customer.phone,customer.address FROM Customer INNER JOIN booking ON booking.customer_id = customer.customer_id WHERE booking.bookingname = $1'
         const values = [bookingname];
         const resultbooking = await pool.query(bookingquery, values);
         const resultdetail = await pool.query(query, values);
         const resultbookingguard = await pool.query(bookingguard,values);
-        console.log(resultbooking.rows);
+        const resultcustomer = await pool.query(customer,values);
+        const {firstname,lastname,phone,address} = resultcustomer.rows[0];
+        const fullname = firstname+' '+lastname;
+        console.log(resultcustomer.rows);
         const bookings = resultbooking.rows.map(bookingRow => {
           const dataBooking = resultdetail.rows;
           if(resultbookingguard.rows === null){
             return {
               bookingName: bookingRow.bookingname,
               companyname: bookingRow.companyname,
+              customername: fullname,
+              phone:phone,
+              addressCustomer: address,
               service: bookingRow.service,
               address: bookingRow.address,
               country: bookingRow.country,
@@ -196,6 +203,9 @@ module.exports = {
             return {
             bookingName: bookingRow.bookingname,
             companyname: bookingRow.companyname,
+            customername: fullname,
+            phone:phone,
+            addressCustomer: address,
             service: bookingRow.service,
             address: bookingRow.address,
             country: bookingRow.country,
