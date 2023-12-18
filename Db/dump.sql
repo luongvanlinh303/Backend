@@ -16,7 +16,7 @@ CREATE TABLE Customer (
     dob DATE,
 	gender boolean,
     address VARCHAR(200),
-    img BYTEA,
+    img VARCHAR(100),
     FOREIGN KEY (users_id) REFERENCES "users"(users_id)
 );
 
@@ -31,7 +31,7 @@ CREATE TABLE Guard (
 	phone VARCHAR(15),
 	gender boolean,
     address VARCHAR(200),
-    img BYTEA,
+    img VARCHAR(100),
     salary DECIMAL,
     FOREIGN KEY (users_id) REFERENCES "users"(users_id)
 );
