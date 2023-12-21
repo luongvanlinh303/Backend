@@ -103,7 +103,7 @@ CREATE TABLE Payment (
     customer_id INT NOT NULL,
     bookingName VARCHAR(100) NOT NULL,
     total DECIMAL(10, 2),
-    payment_date DATE,
+    payment_date timestamp,
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
     FOREIGN KEY (bookingName) REFERENCES Booking(bookingName)
 );
@@ -111,7 +111,7 @@ CREATE TABLE News (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT,
-    publish_date DATE,
+    publish_date timestamp,
     manager_id INT,
     FOREIGN KEY (manager_id) REFERENCES Manager(manager_id)
 );
@@ -121,11 +121,11 @@ CREATE TABLE NotiCus (
     guard_id INT,
     bookingname VARCHAR(100) NOT NULL,
     content TEXT,
-    publish_date DATE,
+    publish_date timestamp,
     manager_id INT,
     type VARCHAR(100),
-    time_start DATE,
-    time_end DATE
+    time_start timestamp,
+    time_end timestamp
 );
 CREATE TABLE NotiGuard (
     noticus_id SERIAL PRIMARY KEY,
@@ -133,11 +133,11 @@ CREATE TABLE NotiGuard (
     guard_id INT,
     bookingname VARCHAR(100) NOT NULL,
     content TEXT,
-    publish_date DATE,
+    publish_date timestamp,
     manager_id INT,
     type VARCHAR(100),
-    time_start DATE,
-    time_end DATE
+    time_start timestamp,
+    time_end timestamp
 );
 CREATE TABLE NotiManager (
     noticus_id SERIAL PRIMARY KEY,
@@ -145,9 +145,9 @@ CREATE TABLE NotiManager (
     guard_id INT,
     bookingname VARCHAR(100) NOT NULL,
     content TEXT,
-    publish_date DATE,
+    publish_date timestamp,
     manager_id INT,
     type VARCHAR(100),
-    time_start DATE,
-    time_end DATE
+    time_start timestamp,
+    time_end timestamp
 );
