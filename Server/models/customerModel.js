@@ -177,7 +177,6 @@ module.exports = {
         const resultcustomer = await pool.query(customer,values);
         const {firstname,lastname,phone,address} = resultcustomer.rows[0];
         const fullname = firstname+' '+lastname;
-        console.log(resultcustomer.rows);
         const bookings = resultbooking.rows.map(bookingRow => {
           const dataBooking = resultdetail.rows;
           if(resultbookingguard.rows === null){
@@ -186,6 +185,7 @@ module.exports = {
               companyname: bookingRow.companyname,
               customername: fullname,
               phone:phone,
+              customer_id:bookingRow.customer_id,
               addressCustomer: address,
               service: bookingRow.service,
               address: bookingRow.address,
@@ -205,6 +205,7 @@ module.exports = {
             companyname: bookingRow.companyname,
             customername: fullname,
             phone:phone,
+            customer_id:bookingRow.customer_id,
             addressCustomer: address,
             service: bookingRow.service,
             address: bookingRow.address,
@@ -324,19 +325,20 @@ module.exports = {
             const { firstname, lastname} = resultCus.rows[0];
             const type = 'attendence';
             const booking_date = new Date();
+            const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
             const company = resultbooking.rows[0];
             const fullName = firstname + ' ' + lastname;
             const content = 'You attendence with company' + company.companyname + ' success' ;
             const createNotiCus = {
               text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8) RETURNING bookingname',
               
-              values: [bookingName,customer_id,type, content,booking_date,1,dataBooking.time_start,dataBooking.time_end],
+              values: [bookingName,customer_id,type, content,formattedDate,1,dataBooking.time_start,dataBooking.time_end],
               };
             await pool.query(createNotiCus);
             const contentGuard = 'User '+ fullName + ' attendence you with company name ' + company.companyname + ' success ';
             const createNotiGuard = 'INSERT INTO notiGuard (bookingname,guard_id,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8,$9) RETURNING bookingname';
               
-              const values = [bookingName,guard_id,customer_id,type,contentGuard,booking_date,1,dataBooking.time_start,dataBooking.time_end];
+              const values = [bookingName,guard_id,customer_id,type,contentGuard,formattedDate,1,dataBooking.time_start,dataBooking.time_end];
             await pool.query(createNotiGuard, values);
       }
       return "Attendence success";
@@ -362,18 +364,19 @@ module.exports = {
     const fullName = firstname + ' ' + lastname;
     const type = 'booking';
     const booking_date = new Date();
+    const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
     const content = 'You payment booking with company name ' + companyname + ' success' ;
     const createNotiCus = {
       text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
       
-      values: [bookingname,customer_id,type, content,booking_date,1],
+      values: [bookingname,customer_id,type, content,formattedDate,1],
       };
     await pool.query(createNotiCus);
     const contentManager = 'User '+ fullName + ' payment booking with company name ' + companyname + ' success ';
     const createNotiManager = {
       text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
       
-      values: [bookingname,customer_id,type, contentManager,booking_date,1],
+      values: [bookingname,customer_id,type, contentManager,formattedDate,1],
       };
     await pool.query(createNotiManager);
     return "Payment success";
@@ -423,19 +426,20 @@ module.exports = {
           const { firstname, lastname} = resultCus.rows[0];
           const type = 'attendence';
           const booking_date = new Date();
+          const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
           const company = resultbooking.rows[0];
           const fullName = firstname + ' ' + lastname;
           const content = 'You edit attendence with company' + company.companyname + ' success' ;
           const createNotiCus = {
             text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8) RETURNING bookingname',
             
-            values: [bookingName,customer_id,type, content,booking_date,1,dataBooking.time_start,dataBooking.time_end],
+            values: [bookingName,customer_id,type, content,formattedDate,1,dataBooking.time_start,dataBooking.time_end],
             };
           await pool.query(createNotiCus);
           const contentGuard = 'User '+ fullName + ' edit attendence you with company name ' + company.companyname + ' success ';
           const createNotiGuard = 'INSERT INTO notiGuard (bookingname,guard_id,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8,$9) RETURNING bookingname';
             
-            const values = [bookingName,guard_id,customer_id,type,contentGuard,booking_date,1,dataBooking.time_start,dataBooking.time_end];
+            const values = [bookingName,guard_id,customer_id,type,contentGuard,formattedDate,1,dataBooking.time_start,dataBooking.time_end];
           await pool.query(createNotiGuard, values);
     }
     return "Edit Attendence success";
@@ -495,7 +499,8 @@ module.exports = {
     },
     getMyNoti: async(customer_id) => {
       try{
-        const query = 'select * From noticus where customer_id = $1 order by noticus_id desc';
+        const query = 'select noticus.customer_id,noticus.guard_id,noticus.bookingname,noticus.content,noticus.publish_date,noticus.type,noticus.time_start,noticus.time_end, booking.companyname From noticus INNER JOIN booking ON booking.bookingname = noticus.bookingname where noticus.customer_id = $1 order by noticus.noticus_id desc';
+
         const values = [customer_id]
         const result = await pool.query(query,values);
         return result.rows;
@@ -537,18 +542,19 @@ module.exports = {
         const fullName = firstname + ' ' + lastname;
         const type = 'cancelbooking';
         const booking_date = new Date();
+        const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
         const content = 'You canceled booking with company name '+ companyname +' success.';
         const createNotiCus = {
           text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, content,booking_date,1],
+          values: [bookingname,customer_id,type, content,formattedDate,1],
           };
         await pool.query(createNotiCus);
         const contentManager = 'User ' +fullName+ ' canceled booking with name '+ companyname +' success';
         const createNotiManager = {
           text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, contentManager,booking_date,1],
+          values: [bookingname,customer_id,type, contentManager,formattedDate,1],
           };
         await pool.query(createNotiManager);
         const DeleteBooking = {
@@ -583,18 +589,19 @@ module.exports = {
         const fullnameGuard = guard_firstname +' '+guard_lastname;
         const type = 'booking';
         const booking_date = new Date();
+        const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
         const content = 'You request change guard '+fullnameGuard+' of booking with company name ' + companyname + ' success' ;
         const createNotiCus = {
           text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,guard_id,manager_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, content,booking_date,guard_id,1],
+          values: [bookingname,customer_id,type, content,formattedDate,guard_id,1],
           };
         await pool.query(createNotiCus);
         const contentManager = 'User '+ fullNameCus +' request change guard '+fullnameGuard+ ' of booking with company name ' + companyname + ' success ';
         const createNotiManager = {
           text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,guard_id,manager_id) VALUES ($1, $2, $3, $4, $5,$6, $7) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, contentManager,booking_date,guard_id,1],
+          values: [bookingname,customer_id,type, contentManager,formattedDate,guard_id,1],
           };
         await pool.query(createNotiManager);
         return "Request Change Success";

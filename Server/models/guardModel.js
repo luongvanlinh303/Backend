@@ -15,12 +15,12 @@ module.exports = {
     try {
       // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
       const updateQuery = {
-        text: 'UPDATE customer SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5, gender=$6 WHERE guard_id = $7',
+        text: 'UPDATE guard SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5, gender=$6 WHERE guard_id = $7',
         values: [firstname, lastname, dob, phone, address,gender, userId],
       };
       await pool.query(updateQuery);
     
-    return 'Customer information updated successfully';
+    return 'guard information updated successfully';
     } catch (err) {
       console.error('Error:', err);
       throw new Error('An error occurred');

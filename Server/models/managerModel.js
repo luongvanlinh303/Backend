@@ -154,25 +154,26 @@ module.exports = {
             const { customer_id,companyname} = resultbooking.rows[0];
             const type = 'booking';
             const booking_date = new Date();
+            const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
             const content = 'Admin added full Guard for your booking with company name ' + companyname + ' success ';
             const createNotiCus = {
               text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
               
-              values: [bookingname,customer_id,type, content,booking_date,1],
+              values: [bookingname,customer_id,type, content,formattedDate,1],
               };
             await pool.query(createNotiCus);
             const contentManager = 'You added Guard with name '+fullName+' for booking with company name ' + companyname + ' success ';
             const createNotiManager = {
               text: 'INSERT INTO notimanager (bookingname,customer_id,type,guard_id,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING bookingname',
               
-              values: [bookingname,customer_id,type,value, contentManager,booking_date,1],
+              values: [bookingname,customer_id,type,value, contentManager,formattedDate,1],
               };
             await pool.query(createNotiManager);
             const contentGuard = 'You added by Admin for booking with company name ' + companyname + ' success ';
             const createNotiGuard = {
               text: 'INSERT INTO notiGuard (bookingname,guard_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
               
-              values: [bookingname,value,type, contentGuard,booking_date,1],
+              values: [bookingname,value,type, contentGuard,formattedDate,1],
               };
             await pool.query(createNotiGuard);
           }
@@ -224,25 +225,26 @@ module.exports = {
           const { customer_id,companyname} = resultbooking.rows[0];
           const type = 'booking';
           const booking_date = new Date();
+          const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
           const content = 'Admin deleted Guard' +fullName+ ' for your booking with company name ' + companyname + ' success ';
           const createNotiCus = {
             text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
             
-            values: [bookingname,customer_id,type, content,booking_date,1],
+            values: [bookingname,customer_id,type, content,formattedDate,1],
             };
           await pool.query(createNotiCus);
           const contentManager = 'You deleted Guard with name '+fullName+' for booking with company name ' + companyname + ' success ';
           const createNotiManager = {
             text: 'INSERT INTO notimanager (bookingname,customer_id,type,guard_id,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING bookingname',
             
-            values: [bookingname,customer_id,type,value, contentManager,booking_date,1],
+            values: [bookingname,customer_id,type,value, contentManager,formattedDate,1],
             };
           await pool.query(createNotiManager);
           const contentGuard = 'You deleted by Admin for booking with company name ' + companyname + ' success ';
           const createNotiGuard = {
             text: 'INSERT INTO notiGuard (bookingname,guard_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
             
-            values: [bookingname,value,type, contentGuard,booking_date,1],
+            values: [bookingname,value,type, contentGuard,formattedDate,1],
             };
           await pool.query(createNotiGuard);
         }
@@ -278,25 +280,26 @@ module.exports = {
               const { customer_id,companyname} = resultbooking.rows[0];
               const type = 'booking';
               const booking_date = new Date();
+              const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
               const content = 'Admin added full Guard for your booking with company name ' + companyname + ' success ';
               const createNotiCus = {
                 text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
                 
-                values: [bookingname,customer_id,type, content,booking_date,1],
+                values: [bookingname,customer_id,type, content,formattedDate,1],
                 };
               await pool.query(createNotiCus);
               const contentManager = 'You added Guard with name '+fullName+' for booking with company name ' + companyname + ' success ';
               const createNotiManager = {
                 text: 'INSERT INTO notimanager (bookingname,customer_id,type,guard_id,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING bookingname',
                 
-                values: [bookingname,customer_id,type,value, contentManager,booking_date,1],
+                values: [bookingname,customer_id,type,value, contentManager,formattedDate,1],
                 };
               await pool.query(createNotiManager);
               const contentGuard = 'You added by Admin for booking with company name ' + companyname + ' success ';
               const createNotiGuard = {
                 text: 'INSERT INTO notiGuard (bookingname,guard_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
                 
-                values: [bookingname,value,type, contentGuard,booking_date,1],
+                values: [bookingname,value,type, contentGuard,formattedDate,1],
                 };
               await pool.query(createNotiGuard);
             }
@@ -328,10 +331,30 @@ module.exports = {
         }
       },
       getGuardById: async (userId) => {
-        const query = 'SELECT * FROM Guard WHERE guard_id = $1';
+        // const query = 'SELECT Guard.firstname, Guard.lastname, Guard.dob, Guard.status, Guard.phone, Guard.gender, Guard.address, Guard.img, Guard.salary, Guard.guard_id FROM WHERE  Guard.guard_id = $1 ';
+        const queryGuard = 'Select * from Guard WHERE guard_id = $1'
+        const queryabsent = 'SELECT Count(Status) FROM Calendar WHERE guard_id = $1 AND Status = 0'
         const values = [userId];
-        const result = await pool.query(query, values);
-        return result.rows[0];
+        const result = await pool.query(queryGuard, values);
+        const resultabsent = await pool.query(queryabsent, values);
+        const result1  = result.rows.map(bookingRow => {
+          const absent = resultabsent.rows[0];
+          return {
+            firstname: bookingRow.firstname,
+            lastname: bookingRow.lastname,
+            dob: bookingRow.dob,
+            status: bookingRow.status,
+            phone: bookingRow.phone,
+            gender: bookingRow.gender,
+            address: bookingRow.address,
+            img: bookingRow.img,
+            salary: bookingRow.salary,
+            guard_id: bookingRow.guard_id,
+            count: absent.count
+          }
+
+         });
+        return result1[0];
     },
       getCustomerById: async (userId) => {
         const query = 'SELECT * FROM customer WHERE customer_id = $1';
@@ -512,18 +535,19 @@ module.exports = {
               const { customer_id,companyname} = resultbooking.rows[0];
               const type = 'booking';
               const booking_date = new Date();
+              const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
               const content = 'Currently, the number of Guards is not enough to allocate to booking '+ companyname +' You can wait or cancel the booking.';
               const createNotiCus = {
                 text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
                 
-                values: [bookingname,customer_id,type, content,booking_date,1],
+                values: [bookingname,customer_id,type, content,formattedDate,1],
                 };
               await pool.query(createNotiCus);
               const contentManager = 'You send request cancel booking'+ companyname +' success';
               const createNotiManager = {
                 text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
                 
-                values: [bookingname,customer_id,type, contentManager,booking_date,1],
+                values: [bookingname,customer_id,type, contentManager,formattedDate,1],
                 };
               await pool.query(createNotiManager);
           return "Send Customer Enough Guard success";
