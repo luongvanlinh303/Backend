@@ -233,6 +233,7 @@ router.get('/getGuardById/:guard_id', managerController.getGuardById);
  *       500:
  *         description: Internal server error
  */
+router.get('/getAllNews', managerController.getAllNews);
 /**
  * @swagger
  * /getTop4News:
