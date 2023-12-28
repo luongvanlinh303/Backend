@@ -99,43 +99,7 @@ module.exports = {
   }
   },
   //
-  changePassword: async (userId, currentPasswd, newPasswd, confirmNewpasswd) => {
-    try {
-      // Lấy thông tin người dùng từ cơ sở dữ liệu
-      const userQuery = {
-        text: 'SELECT passwd FROM users WHERE users_id = $1',
-        values: [userId],
-      };
-      const result = await pool.query(userQuery);
-      const hashedPassword = result.rows[0].passwd;
   
-      // So sánh mật khẩu hiện tại
-      const isPasswordMatched = await bcrypt.compare(currentPasswd, hashedPassword);
-      if (!isPasswordMatched) {
-        throw new Error('Current password is incorrect');
-      }
-  
-      // Hash mật khẩu mới
-      const newHashedPassword = await bcrypt.hash(newPasswd, 10);
-      const confirmNewHashedPassword = await bcrypt.hash(confirmNewpasswd, 10);
-      // Cập nhật mật khẩu mới vào cơ sở dữ liệu
-      if (newPasswd == confirmNewpasswd){
-        const updateQuery = {
-        text: 'UPDATE users SET passwd = $1 WHERE users_id = $2',
-        values: [newHashedPassword, userId],
-      };
-      await pool.query(updateQuery);
-      return 'Password changed successfully';
-    }
-      else {
-        return 'Password confirm different with new password';
-      }
-      
-    } catch (err) {
-      console.error('Error:', err);
-      throw new Error('An error occurred');
-    }
-  },
   //
   resetPassword : async (userId, newPasswd) => {
     try {

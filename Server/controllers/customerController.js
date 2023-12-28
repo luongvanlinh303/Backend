@@ -16,6 +16,17 @@ module.exports = {
           res.status(500).json({ error: 'Internal server error' });
         }
       },
+      changePassword : async (req, res) => {
+        const { userId, currentPasswd, newPasswd , confirmNewpasswd} = req.body;
+      
+        try {
+          const message = await Customer.changePassword(userId, currentPasswd, newPasswd, confirmNewpasswd);
+          return res.status(200).json({ message });
+        } catch (err) {
+          console.error('Error:', err);
+          return res.status(500).json({ message: 'An error occurred' });
+        }
+      },
     changeUserInfo: async (req, res) => {
       const userId = req.params.user_id; 
       const newInfor = req.body;
@@ -29,16 +40,16 @@ module.exports = {
     }
     },
     changeUserImg: async (req, res) => {
-      const userId = req.params.user_id; 
-      const imagePath = req.file.filename;
-
-    try {
-      const result = await Customer.changeImg(userId,filename);
-      return res.status(200).json({ message: result });
-    } catch (err) {
-      console.error('Error:', err);
-      return res.status(500).json({ message: 'An error occurred' });
-    }
+      const userId = req.params.user_id;
+      const imageUrl = req.body.img; 
+  
+      try {
+        const result = await Customer.changeImg(userId, imageUrl);
+        return res.status(200).json({ message: result });
+      } catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      }
     },
     // getUserImg: async (req, res) => {
     //   const imageName = req.params.imageName
@@ -197,6 +208,17 @@ module.exports = {
         return res.status(500).json({ message: 'An error occurred' });
       } 
     },
+    getBookingPayment: async (req, res) => {
+      const customer_id = req.params.customer_id;
+      try {
+        const result = await Customer.getBookingPayment(customer_id);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
     getMyNoti: async (req, res) => {
       const customer_id = req.params.customer_id;
       try {
@@ -219,4 +241,15 @@ module.exports = {
         return res.status(500).json({ message: 'An error occurred' });
       } 
     },
+    RequestChangeGuard: async (req, res) => {
+      const dataGuard = req.body;
+      try {
+        const result = await Customer.RequestChangeGuard(dataGuard);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    }
 };

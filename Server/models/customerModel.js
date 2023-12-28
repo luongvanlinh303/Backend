@@ -4,19 +4,19 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 module.exports = {
     getUserById: async (userId) => {
-        const query = 'SELECT * FROM customer WHERE users_id = $1';
+        const query = 'SELECT * FROM customer WHERE customer_id = $1';
         const values = [userId];
     
         const result = await pool.query(query, values);
         return result.rows[0];
       },
     changeInfo: async (userId , newInfor) => {
-    const { firstname, lastname, dob, phone, address } = newInfor;
+    const { firstname, lastname, dob, phone, address,gender } = newInfor;
     try {
       // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
       const updateQuery = {
-        text: 'UPDATE customer SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5 WHERE users_id = $6',
-        values: [firstname, lastname, dob, phone, address, userId],
+        text: 'UPDATE customer SET firstname = $1, lastname = $2, dob = $3, phone = $4, address = $5, gender=$6 WHERE customer_id = $7',
+        values: [firstname, lastname, dob, phone, address,gender, userId],
       };
       await pool.query(updateQuery);
     
@@ -26,21 +26,63 @@ module.exports = {
       throw new Error('An error occurred');
     }
     },
-    changeImg: async (userId ,imagePath) => {
+    changePassword: async (userId, currentPasswd, newPasswd, confirmNewpasswd) => {
       try {
-        // Cập nhật thông tin người giữ cửa vào cơ sở dữ liệu
-        const updateQuery = {
-          text: 'UPDATE customer SET img = $1 WHERE users_id = $2',
-          values: [imagePath, userId],
+        // Lấy thông tin người dùng từ cơ sở dữ liệu
+        const userQuery = {
+          text: 'SELECT passwd FROM users INNER JOIN Customer on Customer.users_id = users.users_id WHERE Customer_id = $1',
+          values: [userId],
+        };
+        const result = await pool.query(userQuery);
+        const hashedPassword = result.rows[0].passwd;
+    
+        // So sánh mật khẩu hiện tại
+        const isPasswordMatched = await bcrypt.compare(currentPasswd, hashedPassword);
+        if (!isPasswordMatched) {
+          throw new Error('Current password is incorrect');
+        }
+    
+        // Hash mật khẩu mới
+        const newHashedPassword = await bcrypt.hash(newPasswd, 10);
+        const confirmNewHashedPassword = await bcrypt.hash(confirmNewpasswd, 10);
+        // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+        if (newPasswd == confirmNewpasswd){
+          const userQuery = {
+            text: 'SELECT users.users_id FROM users INNER JOIN Customer on Customer.users_id = users.users_id WHERE Customer_id = $1',
+            values: [userId],
+          };
+          const result = await pool.query(userQuery);
+          const resultuser = result.rows[0].users_id;
+          const updateQuery = {
+          text: 'UPDATE users SET passwd = $1  WHERE users_id = $2',
+          values: [newHashedPassword, resultuser],
         };
         await pool.query(updateQuery);
-      
-      return 'Customer information updated successfully';
+        return 'Password changed successfully';
+      }
+        else {
+          return 'Password confirm different with new password';
+        }
+        
       } catch (err) {
         console.error('Error:', err);
         throw new Error('An error occurred');
       }
-      },
+    },
+    changeImg: async (userId, imageUrl) => {
+      try {
+        const updateQuery = {
+          text: 'UPDATE customer SET img = $1 WHERE customer_id = $2',
+          values: [imageUrl, userId],
+        };
+        await pool.query(updateQuery);
+  
+        return 'Customer image updated successfully';
+      } catch (err) {
+        console.error('Error:', err);
+        throw new Error('An error occurred');
+      }
+    },
     getallGuard: async (req, res) =>{
       try {
         const query = 'SELECT * FROM Guard';
@@ -53,7 +95,7 @@ module.exports = {
       }
     },
     getInfoGuardbyID: async (userId) => {
-        const query = 'SELECT * FROM Guard WHERE users_id = $1';
+        const query = 'SELECT * FROM Guard WHERE guard_id = $1';
         const values = [userId];
         const result = await pool.query(query, values);
         return result.rows[0];
@@ -127,16 +169,24 @@ module.exports = {
         const bookingquery = 'SELECT * FROM booking WHERE bookingname = $1'
         const query = 'SELECT time_start,time_end FROM detailbooking WHERE bookingname = $1';
         const bookingguard = 'SELECT Bookingguard.guard_id, guard.firstname,guard.lastname from Bookingguard INNER JOIN guard ON Bookingguard.guard_id = guard.guard_id WHERE Bookingguard.bookingname = $1';
+        const customer = 'SELECT customer.firstname, customer.lastname, customer.phone,customer.address FROM Customer INNER JOIN booking ON booking.customer_id = customer.customer_id WHERE booking.bookingname = $1'
         const values = [bookingname];
         const resultbooking = await pool.query(bookingquery, values);
         const resultdetail = await pool.query(query, values);
         const resultbookingguard = await pool.query(bookingguard,values);
-        
+        const resultcustomer = await pool.query(customer,values);
+        const {firstname,lastname,phone,address} = resultcustomer.rows[0];
+        const fullname = firstname+' '+lastname;
         const bookings = resultbooking.rows.map(bookingRow => {
           const dataBooking = resultdetail.rows;
           if(resultbookingguard.rows === null){
             return {
               bookingName: bookingRow.bookingname,
+              companyname: bookingRow.companyname,
+              customername: fullname,
+              phone:phone,
+              customer_id:bookingRow.customer_id,
+              addressCustomer: address,
               service: bookingRow.service,
               address: bookingRow.address,
               country: bookingRow.country,
@@ -152,6 +202,11 @@ module.exports = {
             const guards = resultbookingguard.rows;
             return {
             bookingName: bookingRow.bookingname,
+            companyname: bookingRow.companyname,
+            customername: fullname,
+            phone:phone,
+            customer_id:bookingRow.customer_id,
+            addressCustomer: address,
             service: bookingRow.service,
             address: bookingRow.address,
             country: bookingRow.country,
@@ -270,19 +325,20 @@ module.exports = {
             const { firstname, lastname} = resultCus.rows[0];
             const type = 'attendence';
             const booking_date = new Date();
+            const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
             const company = resultbooking.rows[0];
             const fullName = firstname + ' ' + lastname;
             const content = 'You attendence with company' + company.companyname + ' success' ;
             const createNotiCus = {
               text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8) RETURNING bookingname',
               
-              values: [bookingName,customer_id,type, content,booking_date,1,dataBooking.time_start,dataBooking.time_end],
+              values: [bookingName,customer_id,type, content,formattedDate,1,dataBooking.time_start,dataBooking.time_end],
               };
             await pool.query(createNotiCus);
             const contentGuard = 'User '+ fullName + ' attendence you with company name ' + company.companyname + ' success ';
             const createNotiGuard = 'INSERT INTO notiGuard (bookingname,guard_id,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8,$9) RETURNING bookingname';
               
-              const values = [bookingName,guard_id,customer_id,type,contentGuard,booking_date,1,dataBooking.time_start,dataBooking.time_end];
+              const values = [bookingName,guard_id,customer_id,type,contentGuard,formattedDate,1,dataBooking.time_start,dataBooking.time_end];
             await pool.query(createNotiGuard, values);
       }
       return "Attendence success";
@@ -308,18 +364,19 @@ module.exports = {
     const fullName = firstname + ' ' + lastname;
     const type = 'booking';
     const booking_date = new Date();
+    const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
     const content = 'You payment booking with company name ' + companyname + ' success' ;
     const createNotiCus = {
       text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
       
-      values: [bookingname,customer_id,type, content,booking_date,1],
+      values: [bookingname,customer_id,type, content,formattedDate,1],
       };
     await pool.query(createNotiCus);
     const contentManager = 'User '+ fullName + ' payment booking with company name ' + companyname + ' success ';
     const createNotiManager = {
       text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
       
-      values: [bookingname,customer_id,type, contentManager,booking_date,1],
+      values: [bookingname,customer_id,type, contentManager,formattedDate,1],
       };
     await pool.query(createNotiManager);
     return "Payment success";
@@ -369,19 +426,20 @@ module.exports = {
           const { firstname, lastname} = resultCus.rows[0];
           const type = 'attendence';
           const booking_date = new Date();
+          const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
           const company = resultbooking.rows[0];
           const fullName = firstname + ' ' + lastname;
           const content = 'You edit attendence with company' + company.companyname + ' success' ;
           const createNotiCus = {
             text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8) RETURNING bookingname',
             
-            values: [bookingName,customer_id,type, content,booking_date,1,dataBooking.time_start,dataBooking.time_end],
+            values: [bookingName,customer_id,type, content,formattedDate,1,dataBooking.time_start,dataBooking.time_end],
             };
           await pool.query(createNotiCus);
           const contentGuard = 'User '+ fullName + ' edit attendence you with company name ' + company.companyname + ' success ';
           const createNotiGuard = 'INSERT INTO notiGuard (bookingname,guard_id,customer_id,type,content,publish_date,manager_id,time_start,time_end) VALUES ($1, $2, $3, $4, $5, $6,$7,$8,$9) RETURNING bookingname';
             
-            const values = [bookingName,guard_id,customer_id,type,contentGuard,booking_date,1,dataBooking.time_start,dataBooking.time_end];
+            const values = [bookingName,guard_id,customer_id,type,contentGuard,formattedDate,1,dataBooking.time_start,dataBooking.time_end];
           await pool.query(createNotiGuard, values);
     }
     return "Edit Attendence success";
@@ -427,9 +485,22 @@ module.exports = {
         throw err;
       }
     },
+    getBookingPayment: async (customer_id) => {
+      try {
+    const query = 'select bookingname,companyname, booking_date, status, total_amount From booking where status = 2 and customer_id = $1';
+    const values = [customer_id]
+    const result = await pool.query(query,values);
+    return result.rows;
+      }
+      catch(err){
+        console.error('Error:', err);
+        throw err;
+      }
+    },
     getMyNoti: async(customer_id) => {
       try{
-        const query = 'select * From noticus where customer_id = $1 order by noticus_id desc';
+        const query = 'select noticus.customer_id,noticus.guard_id,noticus.bookingname,noticus.content,noticus.publish_date,noticus.type,noticus.time_start,noticus.time_end, booking.companyname From noticus INNER JOIN booking ON booking.bookingname = noticus.bookingname where noticus.customer_id = $1 order by noticus.noticus_id desc';
+
         const values = [customer_id]
         const result = await pool.query(query,values);
         return result.rows;
@@ -471,18 +542,19 @@ module.exports = {
         const fullName = firstname + ' ' + lastname;
         const type = 'cancelbooking';
         const booking_date = new Date();
+        const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
         const content = 'You canceled booking with company name '+ companyname +' success.';
         const createNotiCus = {
           text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, content,booking_date,1],
+          values: [bookingname,customer_id,type, content,formattedDate,1],
           };
         await pool.query(createNotiCus);
         const contentManager = 'User ' +fullName+ ' canceled booking with name '+ companyname +' success';
         const createNotiManager = {
           text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,manager_id) VALUES ($1, $2, $3, $4, $5,$6) RETURNING bookingname',
           
-          values: [bookingname,customer_id,type, contentManager,booking_date,1],
+          values: [bookingname,customer_id,type, contentManager,formattedDate,1],
           };
         await pool.query(createNotiManager);
         const DeleteBooking = {
@@ -492,6 +564,47 @@ module.exports = {
         await pool.query(DeleteBooking);
 
         return "Cancel Success";
+      }
+      catch(err){
+        console.error('Error:', err);
+        throw err;
+      }
+    },
+    RequestChangeGuard: async(dataGuard) => {
+      const {bookingname, guard_id} = dataGuard;
+      try{
+        const selectuser = {
+          text: 'Select Customer.firstname, Customer.lastname,Customer.customer_id,booking.companyname from Customer INNER JOIN booking ON Customer.customer_id = booking.customer_id where booking.bookingname = $1',
+          values: [bookingname],
+        };
+        const resultCus = await pool.query(selectuser);
+        const selectguard = {
+          text: 'Select Guard.firstname, Guard.lastname from Guard where guard_id = $1',
+          values: [guard_id],
+        };
+        const resultguard = await pool.query(selectguard);
+        const { firstname, lastname,customer_id,companyname} = resultCus.rows[0];
+        const fullNameCus = firstname + ' ' + lastname;
+        const { firstname: guard_firstname, lastname:guard_lastname} = resultguard.rows[0];
+        const fullnameGuard = guard_firstname +' '+guard_lastname;
+        const type = 'booking';
+        const booking_date = new Date();
+        const formattedDate = moment(booking_date).format('YYYY-MM-DDTHH:mm:ss');
+        const content = 'You request change guard '+fullnameGuard+' of booking with company name ' + companyname + ' success' ;
+        const createNotiCus = {
+          text: 'INSERT INTO notiCus (bookingname,customer_id,type,content,publish_date,guard_id,manager_id) VALUES ($1, $2, $3, $4, $5,$6,$7) RETURNING bookingname',
+          
+          values: [bookingname,customer_id,type, content,formattedDate,guard_id,1],
+          };
+        await pool.query(createNotiCus);
+        const contentManager = 'User '+ fullNameCus +' request change guard '+fullnameGuard+ ' of booking with company name ' + companyname + ' success ';
+        const createNotiManager = {
+          text: 'INSERT INTO notimanager (bookingname,customer_id,type,content,publish_date,guard_id,manager_id) VALUES ($1, $2, $3, $4, $5,$6, $7) RETURNING bookingname',
+          
+          values: [bookingname,customer_id,type, contentManager,formattedDate,guard_id,1],
+          };
+        await pool.query(createNotiManager);
+        return "Request Change Success";
       }
       catch(err){
         console.error('Error:', err);
