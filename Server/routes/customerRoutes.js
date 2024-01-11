@@ -491,7 +491,28 @@ router.get('/getBookingPayment/:customer_id', customerController.getBookingPayme
  *         description: Internal server error
  */
 router.get('/getMyNoti/:customer_id', customerController.getMyNoti);
-
+/**
+ * @swagger
+ * /payment/{customer_id}:
+ *   get:
+ *     summary: Get payment of a customer
+ *     tags: [Customer]
+ *     parameters:
+ *       - in: path
+ *         name: customer_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the customer
+ *     responses:
+ *       200:
+ *         description: Notifications retrieved successfully
+ *       400:
+ *         description: Invalid customer ID
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/getpayment/:customer_id', customerController.getpayment);
 /**
  * @swagger
  * /RequestChangeGuard:

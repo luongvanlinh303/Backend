@@ -3,7 +3,8 @@ CREATE TABLE users (
     users_id SERIAL PRIMARY KEY,
     role INT NOT NULL,
     email VARCHAR(50) NOT NULL,
-    passwd VARCHAR(255) NOT NULL
+    passwd VARCHAR(255) NOT NULL,
+    resettoken VARCHAR(255)
 );
 
 -- Tạo bảng Customer

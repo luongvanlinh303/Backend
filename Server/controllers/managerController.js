@@ -73,6 +73,7 @@ module.exports = {
         const bookingname = req.params.bookingname;
         const listguard = req.body.listguard;
         const result = await Manager.PickGuard(bookingname, listguard);
+        Manager.sendBookingConfirmationEmail(bookingname);
         return res.status(200).json(result);
       }
       catch (err) {
@@ -210,6 +211,7 @@ module.exports = {
         res.status(500).json({ error: 'Internal server error' });
       }
     },
+    
     getTop4News:async (req, res) => {
       try {
         const result = await Manager.getTop4News();
@@ -288,5 +290,18 @@ module.exports = {
         console.error('Error:', err);
         return res.status(500).json({ message: 'An error occurred' });
       } 
+    },
+    getCountAttendance:async (req, res) => {
+      const bookingname = req.params.bookingname;
+      try {
+        const postnews = await Manager.getCountAttendance(bookingname);
+        if (!postnews) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+        res.json(postnews);
+      } catch (error) {
+        console.error('Error retrieving user', error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
     },
     };

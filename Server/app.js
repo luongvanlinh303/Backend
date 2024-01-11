@@ -23,7 +23,7 @@ const options = {
       version: '1.0.0',
     },
   },
-  apis: ['./routes/*.js'], // Đường dẫn tới các file chứa các routes API
+  apis: ['./routes/*.js'],
 };
 const specs = swaggerJsdoc(options);
 app.set('views', path.join(__dirname, 'views'));

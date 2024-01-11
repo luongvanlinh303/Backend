@@ -477,4 +477,26 @@ router.get('/filterByStatus', managerController.filterByStatus);
  *         description: Internal server error
  */
 router.get('/getMyNoti', managerController.getMyNoti);
+/**
+ * @swagger
+ * /getCountAttendance/{bookingname}:
+ *   post:
+ *     summary: getCountAttendance
+ *     tags: [Manager]
+ *     parameters:
+ *       - in: path
+ *         name: bookingname
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the news article
+ *     responses:
+ *       200:
+ *         description: News article deleted successfully
+ *       400:
+ *         description: Invalid news ID
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/getCountAttendance/:bookingname', managerController.getCountAttendance);
 module.exports = router;

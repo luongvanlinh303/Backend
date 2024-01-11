@@ -230,6 +230,17 @@ module.exports = {
         return res.status(500).json({ message: 'An error occurred' });
       } 
     },
+    getpayment: async (req, res) => {
+      const customer_id = req.params.customer_id;
+      try {
+        const result = await Customer.getpayment(customer_id);
+        return res.status(200).json(result);
+      }
+      catch (err) {
+        console.error('Error:', err);
+        return res.status(500).json({ message: 'An error occurred' });
+      } 
+    },
     CancelBooking: async (req, res) => {
       const bookingname = req.params.bookingname;
       try {

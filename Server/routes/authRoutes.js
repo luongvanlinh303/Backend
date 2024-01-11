@@ -86,5 +86,58 @@ router.post('/login', authController.login);
  *         description: Internal server error
  */
 router.post('/resetPassword', authController.resetPassword);
+/**
+ * @swagger
+ * /resetPassword:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       400:
+ *         description: Invalid request body
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/forgotpassword', authController.forgotPassword);
+
+/**
+ * @swagger
+ * /resetPassword:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       400:
+ *         description: Invalid request body
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/resetPasswordforgotpassword', authController.resetPasswordForget);
 
 module.exports = router;
